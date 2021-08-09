@@ -1,0 +1,58 @@
+apiVersion: databases.spotahome.com/v1
+kind: RedisFailover
+metadata:
+  name: redis-staging
+  namespace: redis-staging
+spec:
+  sentinel:
+    replicas: 3
+    image: redis:5.0.5-stretch
+    customConfig:
+      - "down-after-milliseconds 5000"
+      - "failover-timeout 10000"
+      - "parallel-syncs 2"
+    exporter:
+      enabled: true
+      image: leominov/redis_sentinel_exporter:1.7.1
+    resources:
+      requests:
+        cpu: 100m
+      limits:
+        memory: 100Mi
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - redis-staging
+  redis:
+    #https://github.com/spotahome/redis-operator/issues/197
+    command:
+      - redis-server
+      - /redis/redis.conf
+      - --databases
+      - "64"
+      - --maxclients
+      - "20000"
+    replicas: 3
+    image: redis:5.0.5-stretch
+    customConfig:
+      - "save 60 1"
+      - "min-replicas-to-write 1"
+      - "maxmemory 100mb"
+      #- "list-max-ziplist-entries 512"
+      #- "list-max-ziplist-value 64"
+    exporter:
+      enabled: true
+      image: oliver006/redis_exporter:v1.24.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: 400m
+        memory: 500Mi
