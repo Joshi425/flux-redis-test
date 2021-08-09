@@ -5,7 +5,7 @@ metadata:
   namespace: redis-staging
 spec:
   sentinel:
-    replicas: 3
+    replicas: 1
     image: redis:5.0.5-stretch
     customConfig:
       - "down-after-milliseconds 5000"
