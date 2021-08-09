@@ -10,7 +10,7 @@ spec:
     customConfig:
       - "down-after-milliseconds 5000"
       - "failover-timeout 10000"
-      - "parallel-syncs 2"
+      - "parallel-syncs 3"
     exporter:
       enabled: true
       image: leominov/redis_sentinel_exporter:1.7.1
